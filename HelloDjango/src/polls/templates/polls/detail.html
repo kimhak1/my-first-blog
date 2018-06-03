@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>{{ question_data.question_text }} 투표</title>
+</head>
+<body>
+	<h1>{{ question_data.question_text }}</h1>
+	<p>글쓴이 : {{ question_data.customuser.id }}</p>
+	{% if question_data.image %}
+		<img src="{{ question_data.image.url }}" width='300' heigth='300'>
+	{% endif %}
+	<form action="{%url 'polls:vote' question_data.id %}" method="POST">
+		{% csrf_token %}
+		{% for item in question_data.choice_set.all %}
+			<div>
+				<input type="radio" name="vote" value="{{ item.id }}"> {{ item.choice_text }}
+				{% if question_data.customuser.id == request.session.username %}
+					<a href="{% url 'polls:deleteC' item.id %}">답변삭제</a>
+				{% endif %}
+			</div>
+		{% endfor %}
+		{% if question_data.choice_set.all %}
+		<button type="submit">확인</button>
+		{% endif %}
+	</form>
+	{% if question_data.customuser.id == request.session.username %}
+		<form action="{% url 'polls:registerC' question_data.id %}" method="GET">
+			<button type="submit">답변 등록</button>
+		</form>
+		<a href="{% url 'polls:deleteQ' question_data.id %}">해당 질문 삭제</a>
+	{% endif %}
+	
+	<table>
+	<tr>
+		<th>댓글 내용</th>
+		<th>글쓴이</th>
+	</tr>
+	{% for comment in question_data.comment_set.all %}
+	<tr>
+		<td>
+		{% if comment.image %}
+		<img src="{{comment.image.url}}">
+		{% endif %}
+		{{comment.text}}
+		</td>
+		<td>{{comment.customuser.id}}</td>
+	</tr>
+	{% endfor %}
+	</table>
+	<form action="" method="POST" enctype="multipart/form-data">
+		{% csrf_token %}
+		<table>
+			{{form.as_table}}
+		</table>
+		<input type='submit' value='댓글달기'>
+	</form>
+	
+</body>
+</html>	
+
+
